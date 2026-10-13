@@ -178,7 +178,7 @@ Ask two of your classmates what their estimate of $\hat{p}$ was. How do the $\ha
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 1 Answers"}
--   Delete this and put your text answer here.
+-   The estimates were slightly different because each person selected a different random sample of 50 people.
 :::
 
 ::: {.callout-note icon="false" title="Problem 2"}
@@ -186,7 +186,7 @@ Ask two of your classmates what their estimate of $\hat{p}$ was. How do the $\ha
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 2 Answers"}
--   Delete this and put your text answer here.
+-   Everyone got a different estimate because of random sampling variability. Each sample contains different people, so the sample proportions may differ.
 :::
 
 ## Estimating $\widehat{SE}$ from a Single Sample
@@ -252,7 +252,7 @@ What is the name of the column that identifies which of the 1000 samples each ro
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 3 Answers"}
--   Delete this and put your text answer here.
+-   `replicate`
 :::
 
 ::: {.callout-note icon="false" title="Problem 4"}
@@ -260,7 +260,7 @@ What is the sample size $n$ for each of the $1000$ samples we took? (i.e. how ma
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 4 Answers"}
--   Delete this and put your text answer here.
+-   \(n=50\). Each replicate contains 50 people.
 :::
 
 The following code chunk calculates the sample proportion $\hat{p}$ of people who reported they were divorced for each of the **1000 samples**.
@@ -323,10 +323,12 @@ Based on @fig-n50 and @fig-n50base, what appears to be a very common value of $\
 ::: {.callout-important icon="false" collapse="false" title="Problem 5 Answers"}
 ```{r}
 # Type your code and comments below
-
+quantile(phat, c(0.01, 0.99))
+mean(phat)
+sd(phat)
 ```
 
--   Delete this and put your text answer here.
+-   A common value of \(\hat{p}\) is around **0.16**. Values near **0.06 and 0.30 are uncommon**, representing approximately the 1st and 99th percentiles. The mean is **0.16198** and the standard deviation is **0.052215**.
 :::
 
 ## Mean and Standard Error of the Sampling Distribution of $\hat{p}$ for $n = 50$
@@ -346,7 +348,7 @@ How do the values computed in the above code chunk compare to the estimates we g
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 6 Answers"}
--   Delete this and put your text answer here.
+-   The sampling distribution's for `Divorced` respondents mean was approximately **0.162**, and its standard error was approximately **0.0522**. The single-sample estimate was **0.12**, with an estimated standard error of **0.0460**.
 :::
 
 ::: {.callout-note icon="false" title="Problem 7"}
@@ -356,7 +358,10 @@ Use the `rep_sample_n` function to collect 1000 virtual samples of size $n = 15$
 ::: {.callout-important icon="false" collapse="false" title="Problem 7 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+set.seed(910)
 
+n15_1000rep <- gss_YEAR |>
+  rep_sample_n(size = 15, reps = 1000)
 ```
 :::
 
@@ -367,7 +372,15 @@ Calculate sample proportion $\hat{p}$ of people who reported they were `Divorced
 ::: {.callout-important icon="false" collapse="false" title="Problem 8 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+ques8 <- n15_1000rep |>
+  group_by(replicate) |>
+  summarize(
+    divorce_count = sum(marital == "Divorced"),
+    n = n()
+  ) |>
+  mutate(p_hat = divorce_count / n)
 
+head(ques8)
 ```
 :::
 
@@ -380,7 +393,17 @@ Visualize the sampling distribution of $\hat{p}$ from your $n = 15$ sampling wit
 #| label: "fig-n15"
 #| fig-cap: "Simulated sampling distribution of p_hat based on samples of size 15"
 # Type your code and comments inside the code chunk
-
+ggplot(ques8, aes(x = p_hat)) +
+  geom_histogram(
+    binwidth = 0.05,
+    color = "black",
+    fill = "purple"
+  ) +
+  labs(
+    x = "Sample proportion divorced",
+    title = "Sampling Distribution of p-hat (n = 15)"
+  ) +
+  theme_bw()
 ```
 :::
 
@@ -391,7 +414,11 @@ Calculate the mean of the $n = 15$ sampling distribution, and the standard error
 ::: {.callout-important icon="false" collapse="false" title="Problem 10 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
-
+ques8 |>
+  summarize(
+    mean_p_hat = mean(p_hat),
+    SE_p_hat = sd(p_hat)
+  )
 ```
 :::
 
@@ -400,7 +427,7 @@ How does the standard error of the $n = 15$ sampling distribution compare to the
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 11 Answers"}
--   Delete this and put your text answer here.
+-   The standard error for \(n=15\) should be larger than the standard error for \(n=50\).
 :::
 
 ::: {.callout-note icon="false" title="Problem 12"}
@@ -408,7 +435,7 @@ Explain any observed differences from 11.
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 12 Answers"}
--   Delete this and put your text answer here.
+-   The smaller sample size has greater sampling variability because estimates based on fewer people are less consistent from sample to sample.
 :::
 
 ::: {.callout-note icon="false" title="Problem 13"}
@@ -418,7 +445,10 @@ Use the `rep_sample_n` function to collect 1000 virtual samples of size $n = 600
 ::: {.callout-important icon="false" collapse="false" title="Problem 13 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+set.seed(84)
 
+n600_1000rep <- gss_YEAR |>
+  rep_sample_n(size = 600, reps = 1000)
 ```
 :::
 
@@ -429,7 +459,15 @@ Calculate the proportion $\hat{p}$ of people who reported they were `Divorced`fo
 ::: {.callout-important icon="false" collapse="false" title="Problem 14 Answers"}
 ```{r}
 # Type your code and comments inside the code chunk
+ques14 <- n600_1000rep |>
+  group_by(replicate) |>
+  summarize(
+    divorce_count = sum(marital == "Divorced"),
+    n = n()
+  ) |>
+  mutate(p_hat = divorce_count / n)
 
+head(ques14)
 ```
 :::
 
@@ -440,6 +478,11 @@ Calculate the mean of the $n = 600$ sampling distribution, and the standard erro
 ::: {.callout-important icon="false" collapse="false" title="Problem 15 Answers"}
 ```{r}
 # Type your code and answers below
+ques14 |>
+  summarize(
+    mean_p_hat = mean(p_hat),
+    SE_p_hat = sd(p_hat)
+  )
 ```
 :::
 
@@ -448,7 +491,7 @@ Was there more **variability** from sample to sample when we took a sample size 
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 16 Answers"}
--   Delete this and put your text answer here.
+-   The sample size of 50 had more variability than the sample size of 600. The evidence is that the sampling distribution for \(n=50\) has a larger standard deviation.
 :::
 
 ::: {.callout-note icon="false" title="Problem 17"}
@@ -456,11 +499,13 @@ Which sampling distribution looked more normally distributed (bell shaped and sy
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 17 Answers"}
--   Delete this and put your text answer here.
+-   The sampling distribution for \(n=600\) should look the most normally distributed because the larger sample size produces a more bell-shaped and symmetrical distribution.
 
 ```{r, fig.height = 8}
 # Type your code and comments below
-
+hist(ques8$p_hat)
+hist(p_hat_n50_1000rep$p_hat)
+hist(ques14$p_hat)
 ```
 :::
 
@@ -493,7 +538,18 @@ Following the example from the beginning of the Problem Set (roughly line 138), 
 ::: {.callout-important icon="false" collapse="false" title="Problem 18 Answers"}
 ```{r, label = "Test2"}
 # Type your code and comments inside the code chunk
+set.seed(53)
 
+n15_1rep <- gss_YEAR |>
+  rep_sample_n(size = 15, reps = 1)
+
+n15_1rep |>
+  summarize(
+    divorce_count = sum(marital == "Divorced"),
+    n = n(),
+    p_hat = divorce_count / n,
+    se_hat = sqrt(p_hat * (1 - p_hat) / n)
+  )
 
 ```
 :::
@@ -519,6 +575,22 @@ Fill in the Markdown table below with all the standard errors you computed for t
 ```{r, label = "test3"}
 # Your code below
 
+se15 <- sd(ques8$p_hat)
+se50 <- sd(p_hat_n50_1000rep$p_hat)
+se600 <- sd(ques14$p_hat)
+
+
+n15_1rep |>
+  summarize(
+    p_hat = mean(marital == "Divorced"),
+    SE = sqrt(p_hat * (1 - p_hat) / n())
+  )
+
+n50_1rep |>
+  summarize(
+    p_hat = mean(marital == "Divorced"),
+    SE = sqrt(p_hat * (1 - p_hat) / n())
+  )
 ```
 :::
 
@@ -527,7 +599,7 @@ Based on what you observed for 19, **IF** you collected a single sample from 600
 :::
 
 ::: {.callout-important icon="false" collapse="false" title="Problem 20 Answers"}
--   Delete this and put your text answer here.
+-   The standard error should be smaller for a sample of 600 than for a sample of 15 because the standard error decreases as sample size increases.
 :::
 
 # Turning in Your Work
